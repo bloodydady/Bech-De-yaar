@@ -7,6 +7,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { Send, Image as ImageIcon, ArrowLeft, UserCircle, MessageCircle } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import emailjs from 'emailjs-com';
 
 const Chat = () => {
     const { chatId } = useParams();
@@ -116,6 +117,29 @@ const Chat = () => {
 
         const listId = listingInfo?.id || listingIdQuery || null;
         await sendRealtimeMessage(chatId, messageData, listId);
+        
+        // --- NEW: Send Email Notification ---
+        if (otherUser?.email) {
+            const templateParams = {
+                to_name: otherUser.name,
+                to_email: otherUser.email,
+                from_name: userProfile?.name || 'A student',
+                message: msgtext,
+                listing_title: listingInfo?.title || 'Unknown Item',
+                chat_url: window.location.origin + `/chat/${chatId}`
+            };
+
+            emailjs.send(
+                import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                templateParams,
+                import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+            ).then((response) => {
+               console.log('Email sent successfully!', response.status, response.text);
+            }).catch((err) => {
+               console.error('Email failed to send...', err);
+            });
+        }
     };
 
     const isMobile = window.innerWidth < 768;
