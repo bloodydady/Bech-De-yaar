@@ -39,12 +39,12 @@ const Navbar = () => {
     }
   };
 
-  const NavLinks = () => (
+  const NavLinks = ({ onClick }) => (
     <>
-      <Link to="/home" className="hover:text-brand-orange transition-colors">Home</Link>
-      <Link to="/browse" className="hover:text-brand-orange transition-colors">Browse</Link>
-      <Link to="/notes" className="hover:text-brand-orange transition-colors">Notes</Link>
-      <Link to="/about" className="hover:text-brand-orange transition-colors">About</Link>
+      <Link to="/home" onClick={onClick} className="hover:text-brand-orange transition-colors">Home</Link>
+      <Link to="/browse" onClick={onClick} className="hover:text-brand-orange transition-colors">Browse</Link>
+      <Link to="/notes" onClick={onClick} className="hover:text-brand-orange transition-colors">Notes</Link>
+      <Link to="/about" onClick={onClick} className="hover:text-brand-orange transition-colors">About</Link>
     </>
   );
 
@@ -77,7 +77,7 @@ const Navbar = () => {
           {/* Desktop Nav Actions */}
           <div className="hidden md:flex items-center space-x-6">
             <div className="flex space-x-6 text-brand-navy font-semibold items-center">
-              <NavLinks />
+              <NavLinks onClick={() => {}} />
               {currentUser?.email === 'monsteroflove1234@gmail.com' && (
                  <Link to="/admin" className="text-red-600 font-black bg-red-50 px-3 py-1 rounded-md animate-pulse ml-4 border border-red-200">Admin Panel</Link>
               )}
@@ -183,26 +183,26 @@ const Navbar = () => {
               </form>
            )}
            <div className="flex flex-col space-y-4 mb-4 font-semibold text-brand-navy">
-             <NavLinks />
+             <NavLinks onClick={() => setIsMenuOpen(false)} />
            </div>
            
            {currentUser ? (
               <div className="border-t border-gray-200 pt-4 flex flex-col space-y-3">
-                 <Link to="/chat" className="text-gray-700 font-bold flex items-center justify-between">
+                 <Link to="/chat" onClick={() => setIsMenuOpen(false)} className="text-gray-700 font-bold flex items-center justify-between">
                     Chat & Messages 
                     {unreadCount > 0 && <span className="bg-brand-orange text-white px-2 py-0.5 rounded-full text-xs font-black">{unreadCount}</span>}
                  </Link>
-                 <Link to={`/profile/${currentUser.uid}`} className="text-gray-700">My Profile</Link>
-                 <Link to="/my-listings" className="text-gray-700">My Listings</Link>
-                 <Link to="/my-notes" className="text-gray-700">My Notes</Link>
-                 <Link to="/post" className="text-brand-orange font-bold">+ Post Ad</Link>
-                 <Link to="/donate" className="text-pink-500 font-bold flex items-center">❤️ Support / Donate</Link>
-                 <button onClick={logout} className="text-left text-red-600">Logout</button>
+                 <Link to={`/profile/${currentUser.uid}`} onClick={() => setIsMenuOpen(false)} className="text-gray-700">My Profile</Link>
+                 <Link to="/my-listings" onClick={() => setIsMenuOpen(false)} className="text-gray-700">My Listings</Link>
+                 <Link to="/my-notes" onClick={() => setIsMenuOpen(false)} className="text-gray-700">My Notes</Link>
+                 <Link to="/post" onClick={() => setIsMenuOpen(false)} className="text-brand-orange font-bold">+ Post Ad</Link>
+                 <Link to="/donate" onClick={() => setIsMenuOpen(false)} className="text-pink-500 font-bold flex items-center">❤️ Support / Donate</Link>
+                 <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-left text-red-600">Logout</button>
               </div>
            ) : (
               <div className="border-t border-gray-200 pt-4 flex flex-col space-y-3">
-                 <Link to="/login" className="w-full text-center text-brand-navy border border-brand-navy px-4 py-2 rounded-lg font-semibold">Login</Link>
-                 <Link to="/signup" className="w-full text-center bg-brand-orange text-white px-4 py-2 rounded-lg font-semibold">Sign Up</Link>
+                 <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full text-center text-brand-navy border border-brand-navy px-4 py-2 rounded-lg font-semibold">Login</Link>
+                 <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="w-full text-center bg-brand-orange text-white px-4 py-2 rounded-lg font-semibold">Sign Up</Link>
               </div>
            )}
         </div>
