@@ -123,9 +123,9 @@ const Chat = () => {
             const templateParams = {
                 to_name: otherUser.name,
                 to_email: otherUser.email,
-                from_name: userProfile?.name || 'A student',
+                name: userProfile?.name || 'A student',
                 message: msgtext,
-                listing_title: listingInfo?.title || 'Unknown Item',
+                title: listingInfo?.title || 'An item',
                 chat_url: window.location.origin + `/chat/${chatId}`
             };
 
