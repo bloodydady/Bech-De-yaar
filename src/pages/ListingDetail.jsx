@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { MapPin, MessageCircle, DollarSign, Share2, AlertTriangle, ShieldCheck, UserCircle, Phone, Send } from 'lucide-react';
-import { getListingById, getUserById, updateListing, getComments, createComment } from '../firebase/firestore';
+import { MapPin, MessageCircle, DollarSign, Share2, AlertTriangle, ShieldCheck, UserCircle, Phone, Send, Star } from 'lucide-react';
+import { getListingById, getUserById, updateListing, getComments, createComment, getRatings, createRating, createNotification, updateUser } from '../firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { getChatId } from '../firebase/realtimeDb';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -22,6 +22,14 @@ const ListingDetail = () => {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+  const [offerAmount, setOfferAmount] = useState('');
+  
+  // Rating States
+  const [ratings, setRatings] = useState([]);
+  const [ratingValue, setRatingValue] = useState(5);
+  const [ratingText, setRatingText] = useState('');
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -46,6 +54,14 @@ const ListingDetail = () => {
             return { ...c, user: u };
         }));
         setComments(cmtsWithUser);
+
+        // Fetch Seller Ratings
+        const f_ratings = await getRatings(data.user_id);
+        const ratingsWithUser = await Promise.all(f_ratings.map(async (r) => {
+            const u = await getUserById(r.reviewer_id);
+            return { ...r, user: u };
+        }));
+        setRatings(ratingsWithUser);
       } catch (error) {
         console.error("Fetch listing error", error);
       } finally {
@@ -84,6 +100,50 @@ const ListingDetail = () => {
   if (listing?.image_url_1) images.push(listing.image_url_1);
   if (listing?.image_url_2) images.push(listing.image_url_2);
 
+  const handlePostRating = async (e) => {
+    e.preventDefault();
+    if (!currentUser || !seller) return;
+    setRatingLoading(true);
+    try {
+      await createRating({
+        reviewed_user_id: seller.id,
+        reviewer_id: currentUser.uid,
+        rating: ratingValue,
+        comment: ratingText.trim(),
+        listing_title: listing.title
+      });
+      
+      // Update local ratings list
+      const f_ratings = await getRatings(seller.id);
+      const r_withU = await Promise.all(f_ratings.map(async (r) => {
+          const u = await getUserById(r.reviewer_id);
+          return { ...r, user: u };
+      }));
+      setRatings(r_withU);
+      
+      // Recalculate average for the seller
+      const sum = f_ratings.reduce((acc, r) => acc + r.rating, 0);
+      const navg = sum / f_ratings.length;
+      await updateUser(seller.id, { rating_avg: navg, reviews_count: f_ratings.length });
+      
+      // Notify seller
+      await createNotification({
+         recipient_id: seller.id,
+         type: 'rating',
+         title: 'New Rating Received! ★',
+         message: `${currentUser.displayName || 'A student'} gave you ${ratingValue} stars for "${listing.title}"`,
+         link: `/profile/${seller.id}`
+      });
+
+      setRatingText('');
+      toast.success('Rating submitted!');
+    } catch (err) {
+      toast.error('Failed to submit rating');
+    } finally {
+      setRatingLoading(false);
+    }
+  };
+
   const handleShare = () => {
      const url = window.location.href;
      navigator.clipboard.writeText(url);
@@ -94,6 +154,18 @@ const ListingDetail = () => {
      if (!currentUser) return navigate('/login');
      const chatId = getChatId(currentUser.uid, seller.id);
      navigate(`/chat/${chatId}?listing=${listing.id}`);
+  };
+
+  const handleMakeOffer = (e) => {
+    e.preventDefault();
+    if (!currentUser) return navigate('/login');
+    if (!offerAmount || isNaN(offerAmount)) return toast.error("Please enter a valid amount");
+    
+    const chatId = getChatId(currentUser.uid, seller.id);
+    const message = encodeURIComponent(`Hi ${seller.name}, I'm interested in "${listing.title}". Would you accept ₹${offerAmount}?`);
+    
+    setIsOfferModalOpen(false);
+    navigate(`/chat/${chatId}?listing=${listing.id}&msg=${message}`);
   };
 
   if (loading) return <div className="py-32"><LoadingSpinner size="lg" /></div>;
@@ -296,6 +368,7 @@ const ListingDetail = () => {
                    
                    {listing.is_negotiable && (
                       <button 
+                         onClick={() => setIsOfferModalOpen(true)}
                          disabled={listing.status !== 'active'}
                          className="w-full py-4 flex items-center justify-center space-x-2 bg-brand-orange hover:bg-orange-600 font-bold text-white rounded-xl transition shadow-lg disabled:opacity-50"
                       >
@@ -393,6 +466,123 @@ const ListingDetail = () => {
           </div>
         )}
       </div>
+
+      {/* Ratings & Reviews Section */}
+      <div className="mt-10 bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm mb-12">
+         <div className="flex items-center justify-between mb-8">
+            <h3 className="text-2xl font-black text-brand-navy">Seller Ratings ({ratings.length})</h3>
+            {ratings.length > 0 && (
+                <div className="flex items-center bg-orange-50 px-4 py-2 rounded-xl border border-orange-100">
+                    <Star className="w-5 h-5 text-brand-orange fill-brand-orange mr-2" />
+                    <span className="text-xl font-black text-brand-orange">
+                        {(ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length).toFixed(1)}
+                    </span>
+                </div>
+            )}
+         </div>
+
+         {!isOwner && currentUser && (
+             <div className="bg-gray-50 rounded-3xl p-6 mb-8 border border-gray-100">
+                <h4 className="font-black text-brand-navy mb-4">Rate your experience with this seller</h4>
+                <form onSubmit={handlePostRating}>
+                    <div className="flex items-center space-x-3 mb-4">
+                        {[1,2,3,4,5].map(v => (
+                            <button 
+                                key={v} 
+                                type="button"
+                                onClick={() => setRatingValue(v)}
+                                className={`p-2 rounded-lg transition-all ${ratingValue >= v ? 'text-brand-orange scale-110' : 'text-gray-300'}`}
+                            >
+                                <Star className={`w-8 h-8 ${ratingValue >= v ? 'fill-brand-orange' : ''}`} />
+                            </button>
+                        ))}
+                    </div>
+                    <textarea 
+                        value={ratingText}
+                        onChange={(e) => setRatingText(e.target.value)}
+                        placeholder="Was the item as described? Tell others about your experience..."
+                        className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-orange mb-4 min-h-[100px]"
+                    />
+                    <button 
+                        type="submit"
+                        disabled={ratingLoading}
+                        className="bg-brand-navy text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-900 transition shadow-lg disabled:opacity-50"
+                    >
+                        Submit Review
+                    </button>
+                </form>
+             </div>
+         )}
+
+         {ratings.length === 0 ? (
+           <p className="text-center text-gray-400 py-8 font-medium">No ratings yet for this seller.</p>
+         ) : (
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             {ratings.map((r) => (
+               <div key={r.id} className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition">
+                  <div className="flex items-center justify-between mb-3">
+                     <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
+                            {r.user?.profile_photo_url ? (
+                                <img src={r.user.profile_photo_url} className="w-full h-full object-cover" alt="" />
+                            ) : <UserCircle className="w-full h-full text-gray-300 p-1" />}
+                        </div>
+                        <div>
+                            <p className="font-bold text-gray-900 text-sm">{r.user?.name || 'Student'}</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{r.listing_title}</p>
+                        </div>
+                     </div>
+                     <div className="flex items-center text-brand-orange">
+                        <Star className="w-3 h-3 fill-brand-orange mr-1" />
+                        <span className="text-sm font-black">{r.rating}</span>
+                     </div>
+                  </div>
+                  <p className="text-gray-600 text-sm font-medium line-clamp-3 italic">"{r.comment}"</p>
+                  <p className="text-[10px] text-gray-400 mt-2 font-bold">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</p>
+               </div>
+             ))}
+           </div>
+         )}
+      </div>
+
+      {/* Make an Offer Modal */}
+      {isOfferModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-black text-brand-navy mb-2 text-center">Make an Offer</h3>
+            <p className="text-gray-500 text-center mb-6 text-sm">Propose a price for <span className="font-bold text-gray-800">{listing.title}</span></p>
+            
+            <form onSubmit={handleMakeOffer} className="space-y-4">
+              <div>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Your Price (₹)</label>
+                <input 
+                  type="number" 
+                  autoFocus
+                  placeholder={listing.price}
+                  value={offerAmount}
+                  onChange={(e) => setOfferAmount(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 text-2xl font-black text-brand-navy focus:outline-none focus:ring-4 focus:ring-orange-100 focus:border-brand-orange transition"
+                />
+              </div>
+              <div className="flex space-x-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setIsOfferModalOpen(false)}
+                  className="flex-1 py-4 font-bold text-gray-500 hover:bg-gray-50 rounded-2xl transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-4 bg-brand-orange text-white font-black rounded-2xl hover:bg-orange-600 transition shadow-lg shadow-orange-500/30"
+                >
+                  Send Offer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

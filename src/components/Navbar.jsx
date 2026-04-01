@@ -39,14 +39,21 @@ const Navbar = () => {
     }
   };
 
-  const NavLinks = ({ onClick }) => (
-    <>
-      <Link to="/home" onClick={onClick} className="hover:text-brand-orange transition-colors">Home</Link>
-      <Link to="/browse" onClick={onClick} className="hover:text-brand-orange transition-colors">Browse</Link>
-      <Link to="/notes" onClick={onClick} className="hover:text-brand-orange transition-colors">Notes</Link>
-      <Link to="/about" onClick={onClick} className="hover:text-brand-orange transition-colors">About</Link>
-    </>
-  );
+  const NavLinks = ({ onClick }) => {
+    const handleLinkClick = () => {
+      if (onClick) onClick();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    
+    return (
+      <>
+        <Link to="/home" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">Home</Link>
+        <Link to="/browse" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">Browse</Link>
+        <Link to="/notes" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">Notes</Link>
+        <Link to="/about" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">About</Link>
+      </>
+    );
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-sm">
@@ -188,21 +195,25 @@ const Navbar = () => {
            
            {currentUser ? (
               <div className="border-t border-gray-200 pt-4 flex flex-col space-y-3">
-                 <Link to="/chat" onClick={() => setIsMenuOpen(false)} className="text-gray-700 font-bold flex items-center justify-between">
+                 <Link 
+                   to="/chat" 
+                   onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                   className="text-gray-700 font-bold flex items-center justify-between"
+                 >
                     Chat & Messages 
                     {unreadCount > 0 && <span className="bg-brand-orange text-white px-2 py-0.5 rounded-full text-xs font-black">{unreadCount}</span>}
                  </Link>
-                 <Link to={`/profile/${currentUser.uid}`} onClick={() => setIsMenuOpen(false)} className="text-gray-700">My Profile</Link>
-                 <Link to="/my-listings" onClick={() => setIsMenuOpen(false)} className="text-gray-700">My Listings</Link>
-                 <Link to="/my-notes" onClick={() => setIsMenuOpen(false)} className="text-gray-700">My Notes</Link>
-                 <Link to="/post" onClick={() => setIsMenuOpen(false)} className="text-brand-orange font-bold">+ Post Ad</Link>
-                 <Link to="/donate" onClick={() => setIsMenuOpen(false)} className="text-pink-500 font-bold flex items-center">❤️ Support / Donate</Link>
-                 <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-left text-red-600">Logout</button>
+                 <Link to={`/profile/${currentUser.uid}`} onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-gray-700">My Profile</Link>
+                 <Link to="/my-listings" onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-gray-700">My Listings</Link>
+                 <Link to="/my-notes" onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-gray-700">My Notes</Link>
+                 <Link to="/post" onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-brand-orange font-bold">+ Post Ad</Link>
+                 <Link to="/donate" onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-pink-500 font-bold flex items-center">❤️ Support / Donate</Link>
+                 <button onClick={() => { logout(); setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-left text-red-600">Logout</button>
               </div>
            ) : (
               <div className="border-t border-gray-200 pt-4 flex flex-col space-y-3">
-                 <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full text-center text-brand-navy border border-brand-navy px-4 py-2 rounded-lg font-semibold">Login</Link>
-                 <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="w-full text-center bg-brand-orange text-white px-4 py-2 rounded-lg font-semibold">Sign Up</Link>
+                 <Link to="/login" onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-full text-center text-brand-navy border border-brand-navy px-4 py-2 rounded-lg font-semibold">Login</Link>
+                 <Link to="/signup" onClick={() => { setIsMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="w-full text-center bg-brand-orange text-white px-4 py-2 rounded-lg font-semibold">Sign Up</Link>
               </div>
            )}
         </div>

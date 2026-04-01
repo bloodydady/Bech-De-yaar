@@ -67,6 +67,14 @@ const Chat = () => {
     useEffect(() => {
         if (!currentUser || !chatId) return;
         
+        // --- Detect Offer Redirect ---
+        const msgParam = params.get('msg');
+        if (msgParam) {
+            setInputValue(decodeURIComponent(msgParam));
+            // Remove the param from URL without refreshing to avoid double-processing
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+
         const loadChatMeta = async () => {
             const otherIds = chatId.split('_').filter(id => id !== currentUser.uid);
             if(otherIds.length > 0) {

@@ -67,31 +67,39 @@ const NoteDetail = () => {
                     <h1 className="text-3xl font-black text-gray-900 leading-tight mb-4">{note.title}</h1>
                     <p className="text-gray-600 mb-8 leading-relaxed whitespace-pre-line border-b border-gray-100 pb-8">{note.description}</p>
                     
-                    {/* Simulated PDF container */}
-                    <div className="bg-gray-100 rounded-2xl w-full h-[500px] border border-gray-200 overflow-hidden relative flex flex-col items-center justify-center">
-                        {note.price > 0 ? (
-                            <div className="absolute inset-0 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center z-10 px-8 text-center">
-                                <ShoppingCart className="w-16 h-16 text-brand-orange mb-4 opacity-80" />
-                                <h3 className="text-2xl font-black text-brand-navy mb-2">Unlock Full Document</h3>
-                                <p className="text-gray-600 font-medium mb-6">This document requires a payment of ₹{note.price} to view the full contents.</p>
-                                <button onClick={handleDownload} className="bg-brand-orange text-white text-lg font-black px-8 py-4 rounded-xl shadow-xl hover:-translate-y-1 transition flex items-center shadow-orange-500/30">
-                                   Buy Now for ₹{note.price}
-                                </button>
-                            </div>
+                    {/* PDF Preview Container */}
+                    <div className="bg-white rounded-2xl w-full h-[600px] border border-gray-100 overflow-hidden relative group shadow-inner">
+                        {note.file_url ? (
+                            <iframe 
+                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(note.file_url)}&embedded=true`} 
+                                className="w-full h-full border-none"
+                                title="Document Preview"
+                            />
                         ) : (
-                             // Mock iframe for free preview
-                             <div className="flex flex-col items-center text-gray-500">
-                                <FileText className="w-20 h-20 mb-4 opacity-30 text-gray-400" />
-                                <button onClick={handleDownload} className="bg-brand-navy hover:bg-blue-900 text-white font-bold px-6 py-3 rounded-xl transition flex items-center shadow-md">
-                                  <Download className="w-5 h-5 mr-2" /> Download to View
-                               </button>
-                             </div>
+                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                <FileText className="w-16 h-16 mb-2 opacity-20" />
+                                <p className="font-bold">No Preview Available</p>
+                            </div>
                         )}
-                        <iframe 
-                           src={note.price === 0 && note.file_url ? `${note.file_url}#toolbar=0` : ''} 
-                           className="absolute inset-0 w-full h-full border-none pointer-events-none opacity-20"
-                           title="PDF Preview"
-                        />
+
+                        {/* Pay-to-Unlock Overlay for Paid Notes */}
+                        {note.price > 0 && (
+                            <div className="absolute inset-0 bg-white/40 backdrop-blur-[6px] flex flex-col items-center justify-center z-10 px-8 text-center p-6 border-4 border-white">
+                                <div className="bg-white p-8 rounded-3xl shadow-2xl border border-orange-50 max-w-xs animate-in fade-in zoom-in duration-300">
+                                    <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <ShoppingCart className="w-10 h-10 text-brand-orange" />
+                                    </div>
+                                    <h3 className="text-2xl font-black text-brand-navy mb-2">Content Locked</h3>
+                                    <p className="text-gray-500 font-medium mb-6 text-sm">Purchase this document to view all {note.page_count || ''} pages and download the original file.</p>
+                                    <button 
+                                        onClick={handleDownload} 
+                                        className="w-full bg-brand-orange text-white font-black py-4 rounded-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all shadow-orange-500/30"
+                                    >
+                                        Unlock Complete Note
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                  </div>
               </div>
