@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import Toast from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
+import ScrollToTop from './components/ScrollToTop';
 
 // Lazy load pages for performance
 const Landing = React.lazy(() => import('./pages/Landing'));
@@ -43,6 +44,7 @@ const Donate = React.lazy(() => import('./pages/Donate'));
 const App = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <div className="flex flex-col min-h-screen bg-brand-bg relative">
           <Navbar />
