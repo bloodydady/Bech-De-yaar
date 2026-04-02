@@ -8,7 +8,7 @@ import { Send, Image as ImageIcon, ArrowLeft, UserCircle, MessageCircle } from '
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import emailjs from 'emailjs-com';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../firebase/storage';
 
 const Chat = () => {
     const { chatId } = useParams();
