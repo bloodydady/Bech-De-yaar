@@ -5,24 +5,70 @@ import toast from 'react-hot-toast';
 const ImageUpload = ({ images, setImages, maxImages = 2, maxSizeMB = 1 }) => {
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleFiles = (files) => {
-    const validFiles = Array.from(files).filter(file => {
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not an image`);
-        return false;
-      }
-      if (file.size > maxSizeMB * 1024 * 1024) {
-        toast.error(`${file.name} exceeds ${maxSizeMB}MB`);
-        return false;
-      }
-      return true;
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          }, 'image/jpeg', 0.7);
+        };
+      };
     });
+  };
+
+  const handleFiles = async (files) => {
+    const fileList = Array.from(files);
+    toast.loading("Optimizing images...", { id: "compressing", duration: 1000 });
+    
+    const processedFiles = await Promise.all(
+      fileList.map(async (file) => {
+        if (!file.type.startsWith('image/')) {
+          toast.error(`${file.name} is not an image`);
+          return null;
+        }
+        return await compressImage(file);
+      })
+    );
+
+    const validFiles = processedFiles.filter(f => f !== null);
 
     if (images.length + validFiles.length > maxImages) {
       toast.error(`Maximum ${maxImages} images allowed`);
       const allowedSlots = maxImages - images.length;
       if (allowedSlots > 0) {
-         setImages(prev => [...prev, ...validFiles.slice(0, allowedSlots)]);
+        setImages(prev => [...prev, ...validFiles.slice(0, allowedSlots)]);
       }
     } else {
       setImages(prev => [...prev, ...validFiles]);

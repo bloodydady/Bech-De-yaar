@@ -8,6 +8,7 @@ import Toast from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './components/ScrollToTop';
+import AISupportBubble from './components/AISupportBubble';
 
 // Lazy load pages for performance
 const Landing = React.lazy(() => import('./pages/Landing'));
@@ -50,6 +51,7 @@ const App = () => {
           <Navbar />
           <GlobalAdsBanner />
           <Toast />
+          <AISupportBubble />
           
           <main className="flex-grow flex flex-col pt-4 pb-12 w-full max-w-7xl mx-auto md:px-6 lg:px-8">
             <Suspense fallback={<LoadingSpinner fullPage size="lg" />}>
