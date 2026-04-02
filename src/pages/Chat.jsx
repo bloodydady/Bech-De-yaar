@@ -132,6 +132,7 @@ const Chat = () => {
                 to_name: otherUser.name,
                 to_email: otherUser.email,
                 from_name: userProfile?.name || 'A student',
+                name: userProfile?.name || 'A student', // Matches {{name}} in your template top
                 email: currentUser.email, // your email for reply-to
                 message: msgtext,
                 listing_title: listingInfo?.title || 'An item',
