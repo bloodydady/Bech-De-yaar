@@ -25,39 +25,48 @@ const AISupportBubble = () => {
     setChat(prev => [...prev, { role: 'user', content: userMsg }]);
     setLoading(true);
 
+    const fetchWithRetry = async (models) => {
+        for (const model of models) {
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": window.location.origin,
+                        "X-Title": "BechDeYaar AI Support"
+                    },
+                    body: JSON.stringify({
+                        "model": model,
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": "You are the official AI assistant for BechDeYaar, India's smartest student campus marketplace. Help students with buying, selling, and renting items and sharing study notes. Use a friendly, student-focused, and helpful Indian tone. Mention that BechDeYaar allows trading within campuses like IITs, NITs, and local colleges with zero commission."
+                            },
+                            ...chat.slice(-6).map(c => ({ role: c.role, content: c.content })),
+                            { "role": "user", "content": userMsg }
+                        ]
+                    })
+                });
+
+                if (response.ok) return await response.json();
+            } catch (err) {
+                console.warn(`Model ${model} failed, trying next...`);
+            }
+        }
+        throw new Error("All models failed");
+    };
+
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "BechDeYaar AI Support"
-        },
-        body: JSON.stringify({
-          "model": "google/gemini-2.0-flash-exp:free",
-          "messages": [
-            {
-              "role": "system",
-              "content": "You are the official AI assistant for BechDeYaar, India's smartest student campus marketplace. Help students with buying, selling, and renting items and sharing study notes. Use a friendly, student-focused, and helpful Indian tone. Mention that BechDeYaar allows trading within campuses like IITs, NITs, and local colleges with zero commission."
-            },
-            ...chat.slice(-6).map(c => ({ role: c.role, content: c.content })),
-            { "role": "user", "content": userMsg }
-          ]
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("OpenRouter Error:", errorData);
-        throw new Error("API Limit reached or invalid key");
-      }
-
-      const data = await response.json();
+      const data = await fetchWithRetry([
+        "google/gemini-2.0-flash-exp:free",
+        "qwen/qwen-2.5-72b-instruct:free",
+        "meta-llama/llama-3.2-11b-vision-instruct:free"
+      ]);
       const aiResponse = data.choices[0].message.content;
       setChat(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
-      setChat(prev => [...prev, { role: 'assistant', content: "Oops! I'm having a little trouble connecting. Please try again or contact support at monsterproduction21@gmail.com." }]);
+      setChat(prev => [...prev, { role: 'assistant', content: "Oops! I'm temporarily offline. Please try again in 1 minute!" }]);
     } finally {
       setLoading(false);
     }

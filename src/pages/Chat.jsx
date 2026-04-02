@@ -8,6 +8,7 @@ import { Send, Image as ImageIcon, ArrowLeft, UserCircle, MessageCircle } from '
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import emailjs from 'emailjs-com';
+import { supabase } from '../supabaseClient';
 
 const Chat = () => {
     const { chatId } = useParams();
@@ -126,14 +127,14 @@ const Chat = () => {
         const listId = listingInfo?.id || listingIdQuery || null;
         await sendRealtimeMessage(chatId, messageData, listId);
         
-        // --- NEW: Send Email Notification ---
+        // --- Send Email Notification ---
         if (otherUser?.email && currentUser?.email) {
             const templateParams = {
                 to_name: otherUser.name,
                 to_email: otherUser.email,
                 from_name: userProfile?.name || 'A student',
-                name: userProfile?.name || 'A student', // Matches {{name}} in your template top
-                email: currentUser.email, // your email for reply-to
+                name: userProfile?.name || 'A student',
+                email: currentUser.email,
                 message: msgtext,
                 listing_title: listingInfo?.title || 'An item',
                 chat_url: window.location.origin + `/chat/${chatId}`
@@ -144,11 +145,79 @@ const Chat = () => {
                 import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
                 templateParams,
                 import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-            ).then((response) => {
-               console.log('Email sent successfully!', response.status, response.text);
-            }).catch((err) => {
-               console.error('Email failed to send...', err);
-            });
+            ).catch(err => console.error("Email failed", err));
+        }
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !currentUser || !chatId) return;
+
+        // 1. Compress Image
+        const compressImage = (file) => {
+           return new Promise((resolve) => {
+               const reader = new FileReader();
+               reader.readAsDataURL(file);
+               reader.onload = (event) => {
+                   const img = new Image();
+                   img.src = event.target.result;
+                   img.onload = () => {
+                       const canvas = document.createElement('canvas');
+                       const MAX_WIDTH = 800;
+                       const MAX_HEIGHT = 800;
+                       let width = img.width;
+                       let height = img.height;
+
+                       if (width > height) {
+                           if (width > MAX_WIDTH) {
+                               height *= MAX_WIDTH / width;
+                               width = MAX_WIDTH;
+                           }
+                       } else {
+                           if (height > MAX_HEIGHT) {
+                               width *= MAX_HEIGHT / height;
+                               height = MAX_HEIGHT;
+                           }
+                       }
+                       canvas.width = width;
+                       canvas.height = height;
+                       const ctx = canvas.getContext('2d');
+                       ctx.drawImage(img, 0, 0, width, height);
+                       canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.6);
+                   };
+               };
+           });
+        };
+
+        toast.loading("Sending photo...");
+        try {
+            const compressedBlob = await compressImage(file);
+            const fileName = `chat/${chatId}/${Date.now()}.jpg`;
+            
+            const { data, error } = await supabase.storage
+                .from('listing-images')
+                .upload(fileName, compressedBlob);
+
+            if (error) throw error;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('listing-images')
+                .getPublicUrl(fileName);
+
+            const messageData = {
+                sender_id: currentUser.uid,
+                text: "📷 Sent a photo",
+                image_url: publicUrl
+            };
+
+            const listId = listingInfo?.id || listingIdQuery || null;
+            await sendRealtimeMessage(chatId, messageData, listId);
+            toast.dismiss();
+            toast.success("Photo sent!");
+        } catch (error) {
+            console.error("Upload error:", error);
+            toast.dismiss();
+            toast.error("Failed to send photo");
         }
     };
 
@@ -266,13 +335,20 @@ const Chat = () => {
                                                 )}
                                             </div>
                                         )}
-                                        <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${
+                                    <div className={`max-w-[70%] rounded-2xl overflow-hidden ${
                                             isMe 
                                               ? 'bg-brand-orange text-white rounded-br-sm shadow-sm' 
                                               : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm shadow-sm text-brand-navy'
                                         }`}>
-                                            <p className={`font-semibold ${isMe ? 'font-normal' : ''}`}>{msg.text}</p>
-                                            <span className={`text-[10px] flex justify-end mt-1 ${isMe ? 'text-orange-200' : 'text-gray-400'}`}>
+                                            {msg.image_url ? (
+                                                <div className="p-1">
+                                                    <img src={msg.image_url} alt="chat" className="w-full max-h-60 object-cover rounded-xl" />
+                                                    {msg.text !== "📷 Sent a photo" && <p className="px-3 py-2 text-sm">{msg.text}</p>}
+                                                </div>
+                                            ) : (
+                                                <p className="px-4 py-2 text-sm font-semibold">{msg.text}</p>
+                                            )}
+                                            <span className={`text-[10px] flex justify-end px-3 pb-1 ${isMe ? 'text-orange-200' : 'text-gray-400'}`}>
                                                 {msg.created_at ? format(new Date(msg.created_at), 'HH:mm') : 'now'}
                                             </span>
                                         </div>
@@ -285,9 +361,16 @@ const Chat = () => {
                         {/* Input Area */}
                         <div className="p-4 bg-white border-t border-gray-100">
                             <form onSubmit={handleSend} className="flex items-center space-x-2">
-                                <button type="button" className="p-3 text-gray-400 hover:text-brand-navy hover:bg-gray-50 rounded-full transition">
+                                <input 
+                                    type="file" 
+                                    id="chat-upload" 
+                                    className="hidden" 
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                />
+                                <label htmlFor="chat-upload" className="p-3 text-gray-400 hover:text-brand-navy hover:bg-gray-50 rounded-full transition cursor-pointer">
                                     <ImageIcon className="w-5 h-5" />
-                                </button>
+                                </label>
                                 <input 
                                     type="text" 
                                     value={inputValue}
