@@ -30,18 +30,16 @@ const AISupportBubble = () => {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "BechDeYaar AI Support"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          "model": "google/gemini-2.0-flash-lite-preview-02-05:free",
+          "model": "google/gemini-2.0-flash-001",
           "messages": [
             {
               "role": "system",
-              "content": "You are the official AI assistant for BechDeYaar, India's smartest student campus marketplace. Help students with buying, selling, and renting items (electronics, books, cycles, etc.) and sharing study notes (PDFs). Use a friendly, student-focused, and helpful Indian tone. Keep answers concise. Mention that BechDeYaar allows trading within campuses like IITs, NITs, and local colleges with zero commission. If asked about technical issues, tell them to contact support at monsterproduction21@gmail.com."
+              "content": "You are the official AI assistant for BechDeYaar, India's smartest student campus marketplace. Help students with buying, selling, and renting items and sharing study notes. Use a friendly, student-focused, and helpful Indian tone. Mention that BechDeYaar allows trading within campuses like IITs, NITs, and local colleges with zero commission."
             },
-            ...chat.map(c => ({ role: c.role, content: c.content })),
+            ...chat.slice(-4).map(c => ({ role: c.role, content: c.content })),
             { "role": "user", "content": userMsg }
           ]
         })

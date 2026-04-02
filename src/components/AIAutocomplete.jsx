@@ -41,18 +41,14 @@ const AIAutocomplete = ({
         method: "POST",
         headers: {
           "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "BechDeYaar Smart Inputs"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          "model": "google/gemini-2.0-flash-lite-preview-02-05:free",
+          "model": "google/gemini-2.0-flash-001",
           "messages": [
             {
               "role": "system",
-              "content": `You are a helper for a student marketplace in India. Given a partial search term for a ${type} in India (especially Uttar Pradesh), return a JSON array of exactly 5 full and correct names that match the query. 
-              Only return the JSON array. Do not include any other text. 
-              Example input: 'KNIT', Output: ["Kamla Nehru Institute of Technology (KNIT) Sultanpur", "KNIT Hostel", "KNIT Campus", "KNIT Engineering College", "KNIT Sultanpur"]`
+              "content": `Given a search term for a ${type} in India (especially UP), return a clean JSON array of exactly 5 names. No other text.`
             },
             { "role": "user", "content": searchTerm }
           ]
