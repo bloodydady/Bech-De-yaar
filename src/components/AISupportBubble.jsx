@@ -30,20 +30,28 @@ const AISupportBubble = () => {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "HTTP-Referer": window.location.origin,
+          "X-Title": "BechDeYaar AI Support"
         },
         body: JSON.stringify({
-          "model": "qwen/qwen-2.5-72b-instruct:free",
+          "model": "google/gemini-2.0-flash-exp:free",
           "messages": [
             {
               "role": "system",
               "content": "You are the official AI assistant for BechDeYaar, India's smartest student campus marketplace. Help students with buying, selling, and renting items and sharing study notes. Use a friendly, student-focused, and helpful Indian tone. Mention that BechDeYaar allows trading within campuses like IITs, NITs, and local colleges with zero commission."
             },
-            ...chat.slice(-4).map(c => ({ role: c.role, content: c.content })),
+            ...chat.slice(-6).map(c => ({ role: c.role, content: c.content })),
             { "role": "user", "content": userMsg }
           ]
         })
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("OpenRouter Error:", errorData);
+        throw new Error("API Limit reached or invalid key");
+      }
 
       const data = await response.json();
       const aiResponse = data.choices[0].message.content;

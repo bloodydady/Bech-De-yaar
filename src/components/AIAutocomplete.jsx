@@ -41,10 +41,12 @@ const AIAutocomplete = ({
         method: "POST",
         headers: {
           "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "HTTP-Referer": window.location.origin,
+          "X-Title": "BechDeYaar Smart Inputs"
         },
         body: JSON.stringify({
-          "model": "qwen/qwen-2.5-72b-instruct:free",
+          "model": "google/gemini-2.0-flash-exp:free",
           "messages": [
             {
               "role": "system",
@@ -54,6 +56,10 @@ const AIAutocomplete = ({
           ]
         })
       });
+
+      if (!response.ok) {
+        throw new Error("AI Service temporary unavailable");
+      }
 
       const data = await response.json();
       const content = data.choices[0].message.content;
