@@ -12,7 +12,7 @@ import emailjs from 'emailjs-com';
 const Chat = () => {
     const { chatId } = useParams();
     const navigate = useNavigate();
-    const { currentUser } = useAuth();
+    const { currentUser, userProfile } = useAuth();
     
     const [chats, setChats] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -127,13 +127,14 @@ const Chat = () => {
         await sendRealtimeMessage(chatId, messageData, listId);
         
         // --- NEW: Send Email Notification ---
-        if (otherUser?.email) {
+        if (otherUser?.email && currentUser?.email) {
             const templateParams = {
                 to_name: otherUser.name,
                 to_email: otherUser.email,
-                name: userProfile?.name || 'A student',
+                from_name: userProfile?.name || 'A student',
+                email: currentUser.email, // your email for reply-to
                 message: msgtext,
-                title: listingInfo?.title || 'An item',
+                listing_title: listingInfo?.title || 'An item',
                 chat_url: window.location.origin + `/chat/${chatId}`
             };
 
