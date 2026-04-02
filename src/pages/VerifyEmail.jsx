@@ -66,13 +66,28 @@ const VerifyEmail = () => {
                 </p>
 
                 {/* Spam Warning */}
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-8 text-left">
-                    <p className="text-amber-800 font-bold text-sm mb-2">⚠️ Can't find the email?</p>
-                    <ul className="text-amber-700 text-xs space-y-1.5 font-medium list-disc list-inside">
-                        <li>Check your <strong>Spam / Junk folder</strong> — it usually goes there</li>
-                        <li>Search for emails from <strong>noreply@your-app.firebaseapp.com</strong></li>
-                        <li>Mark it as "Not Spam" so future emails arrive in your inbox</li>
-                        <li>If using Gmail, also check <strong>Promotions</strong> tab</li>
+                <div className="bg-brand-navy/5 border border-brand-navy/10 rounded-2xl p-6 mb-8 text-left relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-brand-orange/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150 duration-700"></div>
+                    <p className="text-brand-navy font-black text-sm mb-3 flex items-center">
+                        <span className="w-2 h-2 bg-brand-orange rounded-full mr-2"></span> Can't find the email?
+                    </p>
+                    <ul className="text-gray-600 text-xs space-y-2.5 font-bold list-none">
+                        <li className="flex items-start">
+                            <span className="text-brand-orange mr-2 mt-0.5">•</span> 
+                            <span>Check your <strong>Spam or Junk</strong> folder — Gmail often filters activation links.</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="text-brand-orange mr-2 mt-0.5">•</span> 
+                            <span>Search for: <strong>noreply@bechdeyaar.firebaseapp.com</strong></span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="text-brand-orange mr-2 mt-0.5">•</span> 
+                            <span>Mark it as <strong>"Not Spam"</strong> to move it to your Inbox instantly.</span>
+                        </li>
+                        <li className="flex items-start">
+                             <span className="text-brand-orange mr-2 mt-0.5">•</span> 
+                             <span>Check the <strong>Promotions</strong> or <strong>Updates</strong> tab if using Gmail.</span>
+                        </li>
                     </ul>
                 </div>
 
