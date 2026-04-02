@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import AIAutocomplete from '../components/AIAutocomplete';
 
 const DEFAULT_AVATARS = [
   'https://api.dicebear.com/7.x/big-smile/svg?seed=Felix',
@@ -94,11 +95,23 @@ const Signup = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
              <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">School / College Name</label>
-                <input name="college_name" value={formData.college_name} onChange={handleInputChange} required type="text" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand-orange focus:bg-white transition" placeholder="e.g. DPS, NIT Durgapur" />
+                <AIAutocomplete 
+                    type="college"
+                    value={formData.college_name}
+                    onChange={(val) => setFormData({...formData, college_name: val})}
+                    placeholder="e.g. NIT Durgapur"
+                    required
+                />
              </div>
              <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">City / Area</label>
-                <input name="city" value={formData.city} onChange={handleInputChange} required type="text" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand-orange focus:bg-white transition" placeholder="e.g. Hall 1" />
+                <AIAutocomplete 
+                    type="city"
+                    value={formData.city}
+                    onChange={(val) => setFormData({...formData, city: val})}
+                    placeholder="e.g. Kanpur"
+                    required
+                />
              </div>
           </div>
 

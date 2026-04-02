@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserCircle, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AIAutocomplete from '../components/AIAutocomplete';
 
 const AVATARS = [
   'https://api.dicebear.com/7.x/big-smile/svg?seed=Felix',
@@ -105,11 +106,23 @@ const EditProfile = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2">School / College Name</label>
-                            <input name="college_name" value={formData.college_name} onChange={handleChange} required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand-orange focus:bg-white transition" />
+                            <AIAutocomplete 
+                                type="college"
+                                value={formData.college_name}
+                                onChange={(val) => setFormData({...formData, college_name: val})}
+                                placeholder="e.g. NIT Durgapur"
+                                required
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2">City / Area</label>
-                            <input name="city" value={formData.city} onChange={handleChange} required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand-orange focus:bg-white transition" />
+                            <AIAutocomplete 
+                                type="city"
+                                value={formData.city}
+                                onChange={(val) => setFormData({...formData, city: val})}
+                                placeholder="e.g. Kanpur"
+                                required
+                            />
                         </div>
                     </div>
 

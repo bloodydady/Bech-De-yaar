@@ -43,6 +43,18 @@ const About = React.lazy(() => import('./pages/About'));
 const Donate = React.lazy(() => import('./pages/Donate'));
 
 const App = () => {
+  // Global Redirect Logic
+  React.useEffect(() => {
+    const hostname = window.location.hostname;
+    const oldDomain = "bech-de-yaar.vercel.app";
+    const newDomain = "bechdeyaar.vercel.app";
+    
+    if (hostname === oldDomain) {
+      const newUrl = window.location.href.replace(oldDomain, newDomain);
+      window.location.replace(newUrl);
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <ScrollToTop />
