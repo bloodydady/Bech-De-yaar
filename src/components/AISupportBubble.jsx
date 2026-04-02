@@ -33,7 +33,7 @@ const AISupportBubble = () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          "model": "google/gemini-2.0-flash-001",
+          "model": "qwen/qwen-2.5-72b-instruct:free",
           "messages": [
             {
               "role": "system",
