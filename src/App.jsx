@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import GlobalAdsBanner from './components/GlobalAdsBanner';
@@ -52,6 +53,7 @@ const App = () => {
           <GlobalAdsBanner />
           <Toast />
           <AISupportBubble />
+          <Analytics />
           
           <main className="flex-grow flex flex-col pt-4 pb-12 w-full max-w-7xl mx-auto md:px-6 lg:px-8">
             <Suspense fallback={<LoadingSpinner fullPage size="lg" />}>
