@@ -59,9 +59,9 @@ const AISupportBubble = () => {
 
     try {
       const data = await fetchWithRetry([
-        "google/gemini-2.0-flash-exp:free",
-        "qwen/qwen-2.5-72b-instruct:free",
-        "meta-llama/llama-3.2-11b-vision-instruct:free"
+        "google/gemma-3-27b-it:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "qwen/qwen3-next-80b-a3b-instruct:free"
       ]);
       const aiResponse = data.choices[0].message.content;
       setChat(prev => [...prev, { role: 'assistant', content: aiResponse }]);

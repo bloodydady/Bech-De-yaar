@@ -46,7 +46,7 @@ const AIAutocomplete = ({
           "X-Title": "BechDeYaar Smart Inputs"
         },
         body: JSON.stringify({
-          "model": "google/gemini-2.0-flash-exp:free",
+          "model": "meta-llama/llama-3.3-70b-instruct:free",
           "messages": [
             {
               "role": "system",
