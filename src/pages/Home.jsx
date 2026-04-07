@@ -21,11 +21,13 @@ const Home = () => {
     const fetchHomeData = async () => {
       setLoading(true);
       try {
-        if (!userProfile) return;
-
         // Fetch College Listings
         const collegeRes = await getListings({ status: 'active', category: activeCategory });
-        let filteredCollege = collegeRes.data.filter(l => l.college_name?.toLowerCase() === userProfile.college_name?.toLowerCase());
+        let filteredCollege = collegeRes.data;
+        
+        if (userProfile?.college_name) {
+             filteredCollege = filteredCollege.filter(l => l.college_name?.toLowerCase() === userProfile.college_name?.toLowerCase());
+        }
 
         // Filter by category if strict
         if (activeCategory !== "All") {
@@ -37,8 +39,12 @@ const Home = () => {
         // Only fetch independent queries if "All" is selected to avoid complex index requirements for this demo
         if (activeCategory === "All") {
           // Nearby
-          const nearbyRes = await getListings({ status: 'active' });
-          setNearbyListings(nearbyRes.data.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase() && l.college_name?.toLowerCase() !== userProfile.college_name?.toLowerCase()).slice(0, 10));
+          if (userProfile?.city) {
+             const nearbyRes = await getListings({ status: 'active' });
+             setNearbyListings(nearbyRes.data.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase() && l.college_name?.toLowerCase() !== userProfile.college_name?.toLowerCase()).slice(0, 10));
+          } else {
+             setNearbyListings([]); // Hide nearby section if not logged in
+          }
 
           // Cheap Deals
           const cheapRes = await getListings({ status: 'active' });
@@ -50,7 +56,11 @@ const Home = () => {
 
           // Exit Sales
           const exitRes = await getListings({ is_exit_sale: true, status: 'active' });
-          setExitSales(exitRes.data.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase()).slice(0, 6));
+          let exitSalesFiltered = exitRes.data;
+          if (userProfile?.city) {
+              exitSalesFiltered = exitSalesFiltered.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase());
+          }
+          setExitSales(exitSalesFiltered.slice(0, 6));
         }
 
       } catch (error) {
@@ -96,14 +106,14 @@ const Home = () => {
              {/* Dynamic Sections Based on Active Category */}
              {activeCategory !== "All" ? (
                  <ScrollSection 
-                    title={`${activeCategory} items at ${userProfile?.college_name}`} 
+                    title={`${activeCategory} items at ${userProfile?.college_name || 'All Campuses'}`} 
                     items={collegeListings} 
                     renderItem={l => <ListingCard listing={l} />} 
                  />
              ) : (
                  <>
                     <ScrollSection 
-                        title={`From ${userProfile?.college_name || 'My School/College'}`} 
+                        title={`From ${userProfile?.college_name || 'All Campuses'}`} 
                         items={collegeListings} 
                         seeAllLink={`/browse?college=${encodeURIComponent(userProfile?.college_name || '')}`}
                         renderItem={l => <ListingCard listing={l} />} 
