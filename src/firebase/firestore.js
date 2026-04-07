@@ -141,6 +141,10 @@ export const createNote = async (data) => {
   return docRef.id;
 };
 
+export const deleteNote = async (id) => {
+  await deleteDoc(doc(db, 'notes', id));
+};
+
 // --- Ratings ---
 export const getRatings = async (userId) => {
   const q = query(collection(db, 'ratings'), where('reviewed_user_id', '==', userId));
@@ -154,6 +158,10 @@ export const createRating = async (data) => {
     ...data,
     created_at: new Date().toISOString()
   });
+};
+
+export const deleteRating = async (id) => {
+  await deleteDoc(doc(db, 'ratings', id));
 };
 
 export const createReport = async (data) => {
@@ -214,4 +222,8 @@ export const createComment = async (data) => {
         ...data,
         created_at: new Date().toISOString()
     });
+};
+
+export const deleteComment = async (id) => {
+    await deleteDoc(doc(db, 'comments', id));
 };

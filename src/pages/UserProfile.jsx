@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getUserById, getRatings, createRating, updateUser, getListings } from '../firebase/firestore';
+import { getUserById, getRatings, createRating, deleteRating, updateUser, getListings } from '../firebase/firestore';
 import { getChatId } from '../firebase/realtimeDb';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ListingCard from '../components/ListingCard';
-import { UserCircle, MapPin, Calendar, Star, ShieldCheck, MessageCircle } from 'lucide-react';
+import { UserCircle, MapPin, Calendar, Star, ShieldCheck, MessageCircle, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -95,6 +95,17 @@ const UserProfile = () => {
        if (!currentUser) return navigate('/login');
        const chatId = getChatId(currentUser.uid, userId);
        navigate(`/chat/${chatId}`);
+   };
+
+   const handleDeleteReview = async (ratingId) => {
+       if(!window.confirm("Permanently delete this review?")) return;
+       try {
+           await deleteRating(ratingId);
+           setReviews(prev => prev.filter(r => r.id !== ratingId));
+           toast.success("Review deleted");
+       } catch (err) {
+           toast.error("Failed to delete review");
+       }
    };
 
    if(loading) return <div className="py-20"><LoadingSpinner size="lg" /></div>;
@@ -237,7 +248,7 @@ const UserProfile = () => {
                         </div>
                     ) : (
                         reviews.map(r => (
-                            <div key={r.id} className="flex space-x-4 pb-6 border-b border-gray-50 last:border-0">
+                            <div key={r.id} className="flex space-x-4 pb-6 border-b border-gray-50 last:border-0 relative">
                                 <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-100">
                                     {r.reviewer?.profile_photo_url ? (
                                         <img src={r.reviewer.profile_photo_url} className="w-full h-full object-cover" alt="" />
@@ -245,7 +256,7 @@ const UserProfile = () => {
                                         <div className="w-full h-full flex items-center justify-center"><UserCircle className="w-6 h-6 text-gray-300" /></div>
                                     )}
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 pr-10">
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="font-bold text-gray-900">{r.reviewer?.name || 'Student'}</span>
                                         <span className="text-xs text-gray-400">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</span>
@@ -257,6 +268,11 @@ const UserProfile = () => {
                                     </div>
                                     {r.comment && <p className="text-gray-600 font-medium">{r.comment}</p>}
                                 </div>
+                                {(currentUser?.uid === r.reviewer_id || currentUser?.email === 'monsteroflove1234@gmail.com') && (
+                                    <button onClick={() => handleDeleteReview(r.id)} className="absolute top-0 right-0 text-red-400 hover:text-red-600 p-2 bg-red-50 rounded-lg transition hover:scale-110">
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                )}
                             </div>
                         ))
                     )}

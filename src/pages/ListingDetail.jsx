@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { MapPin, MessageCircle, DollarSign, Share2, AlertTriangle, ShieldCheck, UserCircle, Phone, Send, Star } from 'lucide-react';
-import { getListingById, getUserById, updateListing, getComments, createComment, getRatings, createRating, createNotification, updateUser } from '../firebase/firestore';
+import { MapPin, MessageCircle, DollarSign, Share2, AlertTriangle, ShieldCheck, UserCircle, Phone, Send, Star, Trash2 } from 'lucide-react';
+import { getListingById, getUserById, updateListing, getComments, createComment, deleteComment, getRatings, createRating, deleteRating, createNotification, updateUser } from '../firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { getChatId } from '../firebase/realtimeDb';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -96,6 +96,17 @@ const ListingDetail = () => {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Delete this comment permanently?")) return;
+    try {
+      await deleteComment(commentId);
+      setComments(prev => prev.filter(c => c.id !== commentId));
+      toast.success("Comment deleted");
+    } catch (e) {
+      toast.error("Failed to delete comment");
+    }
+  };
+
   const images = [];
   if (listing?.image_url_1) images.push(listing.image_url_1);
   if (listing?.image_url_2) images.push(listing.image_url_2);
@@ -141,6 +152,17 @@ const ListingDetail = () => {
       toast.error('Failed to submit rating');
     } finally {
       setRatingLoading(false);
+    }
+  };
+
+  const handleDeleteRating = async (ratingId) => {
+    if (!window.confirm("Delete this rating permanently?")) return;
+    try {
+      await deleteRating(ratingId);
+      setRatings(prev => prev.filter(r => r.id !== ratingId));
+      toast.success("Rating deleted");
+    } catch (e) {
+      toast.error("Failed to delete rating");
     }
   };
 
@@ -461,6 +483,11 @@ const ListingDetail = () => {
                   </div>
                   <p className="text-gray-600 font-medium">{c.text}</p>
                 </div>
+                {(currentUser?.uid === c.user_id || currentUser?.email === 'monsteroflove1234@gmail.com') && (
+                  <button onClick={() => handleDeleteComment(c.id)} className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-xl transition self-start flex-shrink-0">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -519,8 +546,13 @@ const ListingDetail = () => {
          ) : (
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              {ratings.map((r) => (
-               <div key={r.id} className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition">
-                  <div className="flex items-center justify-between mb-3">
+               <div key={r.id} className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition relative">
+                  {(currentUser?.uid === r.reviewer_id || currentUser?.email === 'monsteroflove1234@gmail.com') && (
+                      <button onClick={() => handleDeleteRating(r.id)} className="absolute top-3 right-3 text-red-400 hover:text-red-600 p-2 bg-red-50 rounded-lg transition hover:scale-110">
+                          <Trash2 className="w-4 h-4" />
+                      </button>
+                  )}
+                  <div className="flex items-center justify-between mb-3 pr-8">
                      <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
                             {r.user?.profile_photo_url ? (

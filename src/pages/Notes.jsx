@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { getNotes } from '../firebase/firestore';
+import { getNotes, deleteNote } from '../firebase/firestore';
+import { useAuth } from '../context/AuthContext';
 import NotesCard from '../components/NotesCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import { Search } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Notes = () => {
+  const { currentUser } = useAuth();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All'); // All, Free, Paid
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleDeleteNote = async (id) => {
+     if(!window.confirm("Permanently obliterate this PDF/Note?")) return;
+     try {
+         await deleteNote(id);
+         setNotes(prev => prev.filter(n => n.id !== id));
+         toast.success("Note removed completely.");
+     } catch (e) {
+         toast.error("Failed to delete note.");
+     }
+  };
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -95,7 +109,12 @@ const Notes = () => {
        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
              {filteredNotes.map(note => (
-                <NotesCard key={note.id} note={note} />
+                <NotesCard 
+                  key={note.id} 
+                  note={note} 
+                  showActions={currentUser?.email === 'monsteroflove1234@gmail.com'}
+                  onDelete={handleDeleteNote}
+                />
              ))}
           </div>
        )}

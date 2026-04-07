@@ -13,7 +13,7 @@ const EditListing = () => {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [formData, setFormData] = useState({
-       title: '', description: '', price: 0, status: 'active'
+       title: '', description: '', price: 0, security_deposit: 0, status: 'active'
     });
 
     useEffect(() => {
@@ -41,6 +41,7 @@ const EditListing = () => {
                 title: formData.title,
                 description: formData.description,
                 price: Number(formData.price),
+                security_deposit: Number(formData.security_deposit || 0),
                 status: formData.status
             });
             toast.success("Updated successfully!");
@@ -64,9 +65,15 @@ const EditListing = () => {
                         <input type="text" name="title" value={formData.title} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 rounded-xl" />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1">Price</label>
+                        <label className="block text-sm font-bold text-gray-700 mb-1">Price (₹)</label>
                         <input type="number" name="price" value={formData.price} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 rounded-xl" />
                     </div>
+                    {formData.listing_type === 'rent' && (
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-1">Security Deposit (₹)</label>
+                            <input type="number" name="security_deposit" value={formData.security_deposit || 0} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 rounded-xl" />
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-1">Status</label>
                         <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 rounded-xl">
