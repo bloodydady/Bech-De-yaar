@@ -37,6 +37,20 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
+    // 1. Name Validation (Letters only, min 3 chars)
+    const nameRegex = /^[a-zA-Z\s]{3,50}$/;
+    if (!nameRegex.test(formData.name.trim())) {
+      return toast.error("Please enter a valid real name (letters only).");
+    }
+
+    // 2. Email Validation (Block Temp Emails)
+    const tempDomains = ['yopmail.com', 'mailinator.com', '10minutemail.com', 'tempmail.com', 'guerrillamail.com', 'throwawaymail.com'];
+    const emailDomain = formData.email.split('@')[1]?.toLowerCase();
+    if (tempDomains.includes(emailDomain)) {
+      return toast.error("Disposable email addresses are not allowed.");
+    }
+
     if (formData.password !== formData.confirmPassword) {
       return toast.error("Passwords do not match");
     }

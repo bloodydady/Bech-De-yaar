@@ -41,7 +41,7 @@ const Browse = () => {
       if (filters.type !== 'All') qFilters.type = filters.type;
       if (filters.condition !== 'All') qFilters.condition = filters.condition;
 
-      const res = await getListings(qFilters, 12, isLoadMore ? lastDoc : null);
+      const res = await getListings(qFilters, 50, isLoadMore ? lastDoc : null);
       
       // Client side filtering for text, price, and college mapping
       let filtered = res.data;
@@ -57,7 +57,7 @@ const Browse = () => {
       setLastDoc(res.lastDoc);
       
       // If we got fewer docs than limit, probably no more, though simple pagination isn't perfect with client filtering
-      setHasMore(res.data.length === 12);
+      setHasMore(res.data.length === 50);
     } catch (error) {
       console.error("Failed to fetch listings", error);
     } finally {
@@ -235,7 +235,7 @@ const Browse = () => {
                      ))}
                  </div>
                  
-                 {hasMore && listings.length >= 12 && (
+                 {hasMore && listings.length >= 50 && (
                      <div className="mt-12 text-center">
                          <button 
                             onClick={() => fetchListingsData(true)}
