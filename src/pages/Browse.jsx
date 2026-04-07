@@ -30,7 +30,7 @@ const Browse = () => {
     college: searchParams.get('college') || '',
     query: searchParams.get('q') || '',
     minPrice: searchParams.get('minPrice') || 0,
-    maxPrice: searchParams.get('maxPrice') || 50000,
+    maxPrice: searchParams.get('maxPrice') || 500000,
   });
 
   const fetchListingsData = async (isLoadMore = false) => {
@@ -96,7 +96,7 @@ const Browse = () => {
   const handleResetFilters = () => {
     setFilters({
       category: 'All', type: 'All', condition: 'All',
-      college: '', query: '', minPrice: 0, maxPrice: 50000
+      college: '', query: '', minPrice: 0, maxPrice: 500000
     });
     setSearchParams({});
     setShowFilters(false);
