@@ -9,6 +9,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import emailjs from 'emailjs-com';
 import { supabase } from '../firebase/storage';
+import toast from 'react-hot-toast';
 
 const Chat = () => {
     const { chatId } = useParams();
