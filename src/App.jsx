@@ -25,6 +25,11 @@ const Notes = React.lazy(() => import('./pages/Notes'));
 const NoteDetail = React.lazy(() => import('./pages/NoteDetail'));
 const UploadNotes = React.lazy(() => import('./pages/UploadNotes'));
 const MyNotes = React.lazy(() => import('./pages/MyNotes'));
+const LazyTasks = React.lazy(() => import('./pages/LazyTasks'));
+const PostTask = React.lazy(() => import('./pages/PostTask'));
+const TaskDetail = React.lazy(() => import('./pages/TaskDetail'));
+const EditTask = React.lazy(() => import('./pages/EditTask'));
+const MyTasks = React.lazy(() => import('./pages/MyTasks'));
 const Chat = React.lazy(() => import('./pages/Chat'));
 const UserProfile = React.lazy(() => import('./pages/UserProfile'));
 const EditProfile = React.lazy(() => import('./pages/EditProfile'));
@@ -82,6 +87,12 @@ const App = () => {
                 <Route path="/upload-notes" element={<ProtectedRoute><UploadNotes /></ProtectedRoute>} />
                 <Route path="/my-notes" element={<ProtectedRoute><MyNotes /></ProtectedRoute>} />
                 
+                <Route path="/lazy-tasks" element={<LazyTasks />} />
+                <Route path="/lazy-tasks/post" element={<ProtectedRoute><PostTask /></ProtectedRoute>} />
+                <Route path="/lazy-tasks/:id" element={<TaskDetail />} />
+                <Route path="/lazy-tasks/:id/edit" element={<ProtectedRoute><EditTask /></ProtectedRoute>} />
+                <Route path="/my-tasks" element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
+
                 <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
                 <Route path="/chat/:chatId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
                 

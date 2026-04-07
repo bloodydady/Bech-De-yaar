@@ -227,3 +227,71 @@ export const createComment = async (data) => {
 export const deleteComment = async (id) => {
     await deleteDoc(doc(db, 'comments', id));
 };
+
+// --- Lazy Tasks ---
+export const createLazyTask = async (data) => {
+    const expires_at = new Date();
+    expires_at.setHours(expires_at.getHours() + 2); // 2 hour lifespan for unaccepted tasks
+
+    const docRef = await addDoc(collection(db, 'lazy_tasks'), {
+        ...data,
+        status: 'open', // open, accepted, completed, cancelled
+        created_at: new Date().toISOString(),
+        expires_at: expires_at.toISOString()
+    });
+    return docRef.id;
+};
+
+export const getLazyTasks = async (filters = {}, limitCount = 50) => {
+    const tasksRef = collection(db, 'lazy_tasks');
+    let qArgs = [];
+    
+    if (filters.status) qArgs.push(where('status', '==', filters.status));
+    if (filters.category && filters.category !== 'All') qArgs.push(where('category', '==', filters.category));
+    qArgs.push(limit(limitCount));
+    
+    const q = query(tasksRef, ...qArgs);
+    const snap = await getDocs(q);
+    let fetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Sort Newest First
+    fetched.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return fetched;
+};
+
+export const getLazyTaskById = async (id) => {
+    const docSnap = await getDoc(doc(db, 'lazy_tasks', id));
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+};
+
+export const updateLazyTask = async (id, data) => {
+    await updateDoc(doc(db, 'lazy_tasks', id), data);
+};
+
+export const deleteLazyTask = async (id) => {
+    await deleteDoc(doc(db, 'lazy_tasks', id));
+};
+
+export const getUserLazyTasks = async (userId) => {
+    const tasksRef = collection(db, 'lazy_tasks');
+    
+    const snapPosted = await getDocs(query(tasksRef, where('posted_by', '==', userId)));
+    const snapAccepted = await getDocs(query(tasksRef, where('accepted_by', '==', userId)));
+    
+    const posted = snapPosted.docs.map(d => ({ id: d.id, ...d.data() }));
+    const accepted = snapAccepted.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    const sortDesc = (a, b) => new Date(b.created_at) - new Date(a.created_at);
+    return {
+        posted: posted.sort(sortDesc),
+        accepted: accepted.sort(sortDesc)
+    };
+};
+
+// --- Task Ratings ---
+export const createTaskRating = async (data) => {
+    await addDoc(collection(db, 'task_ratings'), {
+        ...data,
+        created_at: new Date().toISOString()
+    });
+};

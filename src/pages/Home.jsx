@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getListings, getNotes } from '../firebase/firestore';
+import { getListings, getNotes, getLazyTasks } from '../firebase/firestore';
 import ListingCard from '../components/ListingCard';
 import NotesCard from '../components/NotesCard';
+import TaskCard from '../components/TaskCard';
 import CategoryPills from '../components/CategoryPills';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -15,6 +16,7 @@ const Home = () => {
   const [cheapDeals, setCheapDeals] = useState([]);
   const [notes, setNotes] = useState([]);
   const [exitSales, setExitSales] = useState([]);
+  const [lazyTasks, setLazyTasks] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
@@ -61,6 +63,19 @@ const Home = () => {
               exitSalesFiltered = exitSalesFiltered.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase());
           }
           setExitSales(exitSalesFiltered.slice(0, 6));
+
+          // Lazy Tasks
+          try {
+              const lazyRes = await getLazyTasks({ status: 'open' }, 20);
+              const now = new Date();
+              let validLazy = lazyRes.filter(t => new Date(t.expires_at) > now);
+              if (userProfile?.city) {
+                  validLazy = validLazy.filter(t => t.city?.toLowerCase() === userProfile.city?.toLowerCase());
+              }
+              setLazyTasks(validLazy.slice(0, 4));
+          } catch(err) {
+              console.error("Failed fetching lazy tasks", err);
+          }
         }
 
       } catch (error) {
@@ -117,6 +132,14 @@ const Home = () => {
                         items={collegeListings} 
                         seeAllLink={`/browse?college=${encodeURIComponent(userProfile?.college_name || '')}`}
                         renderItem={l => <ListingCard listing={l} />} 
+                    />
+
+                    <ScrollSection 
+                        title="⚡ Lazy Tasks Near You" 
+                        items={lazyTasks} 
+                        seeAllLink="/lazy-tasks"
+                        titleHighlight="text-brand-orange"
+                        renderItem={t => <TaskCard task={t} />} 
                     />
 
                     {exitSales.length > 0 && (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Bell, Menu, Search, X, User, MessageSquare } from 'lucide-react';
+import { Bell, Menu, Search, X, User, MessageSquare, Zap } from 'lucide-react';
 import { subscribeToUnreadCount } from '../firebase/realtimeDb';
 import { subscribeToNotifications } from '../firebase/firestore';
 
@@ -49,6 +49,7 @@ const Navbar = () => {
         <Link to="/home" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">Home</Link>
         <Link to="/browse" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">Browse</Link>
         <Link to="/notes" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">Notes</Link>
+        <Link to="/lazy-tasks" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors flex items-center text-brand-orange font-bold"><Zap className="w-4 h-4 mr-1 fill-current"/> Tasks</Link>
         <Link to="/about" onClick={handleLinkClick} className="hover:text-brand-orange transition-colors">About</Link>
       </>
     );
@@ -132,6 +133,7 @@ const Navbar = () => {
                         <Link to={`/profile/${currentUser.uid}`} onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</Link>
                         <Link to="/my-listings" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Listings</Link>
                         <Link to="/my-notes" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Notes</Link>
+                        <Link to="/my-tasks" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Tasks</Link>
                         <Link to="/settings" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
                         <button 
                           onClick={() => { setIsProfileOpen(false); logout(); }}
@@ -205,6 +207,7 @@ const Navbar = () => {
                  <Link to={`/profile/${currentUser.uid}`} onClick={() => { setIsMenuOpen(false); }} className="text-gray-700">My Profile</Link>
                  <Link to="/my-listings" onClick={() => { setIsMenuOpen(false); }} className="text-gray-700">My Listings</Link>
                  <Link to="/my-notes" onClick={() => { setIsMenuOpen(false); }} className="text-gray-700">My Notes</Link>
+                 <Link to="/my-tasks" onClick={() => { setIsMenuOpen(false); }} className="text-gray-700">My Tasks</Link>
                  <Link to="/post" onClick={() => { setIsMenuOpen(false); }} className="text-brand-orange font-bold">+ Post Ad</Link>
                  <Link to="/donate" onClick={() => { setIsMenuOpen(false); }} className="text-pink-500 font-bold flex items-center">❤️ Support / Donate</Link>
                  <button onClick={() => { logout(); setIsMenuOpen(false); }} className="text-left text-red-600">Logout</button>
