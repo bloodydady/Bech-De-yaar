@@ -36,7 +36,7 @@ const Browse = () => {
   const fetchListingsData = async (isLoadMore = false) => {
     isLoadMore ? setLoading(false) : setLoading(true);
     try {
-      const qFilters = { status: 'active' };
+      const qFilters = {};
       if (filters.category !== 'All') qFilters.category = filters.category;
       if (filters.type !== 'All') qFilters.type = filters.type;
       if (filters.condition !== 'All') qFilters.condition = filters.condition;

@@ -22,7 +22,7 @@ const Home = () => {
       setLoading(true);
       try {
         // Fetch College Listings
-        const collegeRes = await getListings({ status: 'active', category: activeCategory });
+        const collegeRes = await getListings({ category: activeCategory !== "All" ? activeCategory : undefined }, 100);
         let filteredCollege = collegeRes.data;
         
         if (userProfile?.college_name) {
@@ -34,28 +34,28 @@ const Home = () => {
              filteredCollege = filteredCollege.filter(l => l.category === activeCategory);
         }
 
-        setCollegeListings(filteredCollege.slice(0, 10));
+        setCollegeListings(filteredCollege);
 
         // Only fetch independent queries if "All" is selected to avoid complex index requirements for this demo
         if (activeCategory === "All") {
           // Nearby
           if (userProfile?.city) {
-             const nearbyRes = await getListings({ status: 'active' });
-             setNearbyListings(nearbyRes.data.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase() && l.college_name?.toLowerCase() !== userProfile.college_name?.toLowerCase()).slice(0, 10));
+             const nearbyRes = await getListings({}, 100);
+             setNearbyListings(nearbyRes.data.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase() && l.college_name?.toLowerCase() !== userProfile.college_name?.toLowerCase()));
           } else {
              setNearbyListings([]); // Hide nearby section if not logged in
           }
 
           // Cheap Deals
-          const cheapRes = await getListings({ status: 'active' });
-          setCheapDeals(cheapRes.data.filter(l => l.price <= 500 && l.price > 0).slice(0, 10));
+          const cheapRes = await getListings({}, 100);
+          setCheapDeals(cheapRes.data.filter(l => l.price <= 500 && l.price > 0));
 
           // Notes
-          const notesRes = await getNotes({}, 8);
+          const notesRes = await getNotes({}, 10);
           setNotes(notesRes.data);
 
           // Exit Sales
-          const exitRes = await getListings({ is_exit_sale: true, status: 'active' });
+          const exitRes = await getListings({ is_exit_sale: true }, 100);
           let exitSalesFiltered = exitRes.data;
           if (userProfile?.city) {
               exitSalesFiltered = exitSalesFiltered.filter(l => l.city?.toLowerCase() === userProfile.city?.toLowerCase());
