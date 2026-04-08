@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getLazyTaskById, updateLazyTask, createNotification, deleteLazyTask } from '../firebase/firestore';
+import { getLazyTaskById, updateLazyTask, createNotification, deleteLazyTask, getUserById } from '../firebase/firestore';
 import { getChatId } from '../firebase/realtimeDb';
+import emailjs from 'emailjs-com';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -64,6 +65,32 @@ const TaskDetail = () => {
                 message: `${userProfile?.name || 'Someone'} accepted your task: "${task.title}". Check your accepted tasks for details!`,
                 link: `/lazy-tasks/${id}`
             });
+
+            // --- Send Email Notification ---
+            try {
+                const posterInfo = await getUserById(task.posted_by);
+                if (posterInfo && posterInfo.email) {
+                    const templateParams = {
+                        to_name: posterInfo.name || 'Student',
+                        to_email: posterInfo.email,
+                        from_name: 'Bech De Yaar Tasks',
+                        name: 'Bech De Yaar Tasks',
+                        email: 'noreply@bechdeyaar.com',
+                        message: `Great news! ${userProfile?.name || 'A student'} has just accepted your task "${task.title}". They are working on it right now and will get your ₹${task.task_fee} on delivery. Open the task link to coordinate with them via chat!`,
+                        listing_title: task.title,
+                        chat_url: window.location.origin + `/lazy-tasks/${id}`
+                    };
+
+                    emailjs.send(
+                        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                        templateParams,
+                        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+                    ).catch(err => console.error("Email failed", err));
+                }
+            } catch (emailErr) {
+                console.error("Failed to fetch poster for email", emailErr);
+            }
 
             setTask(prev => ({ 
                 ...prev, 
