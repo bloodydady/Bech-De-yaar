@@ -60,22 +60,31 @@ export const getListings = async (filters = {}, limitCount = 10, lastDoc = null)
   if (filters.is_exit_sale) qArgs.push(where('is_exit_sale', '==', true));
   if (filters.userId) qArgs.push(where('user_id', '==', filters.userId));
   
-  // Note: Removing orderBy('created_at', 'desc') to prevent Firebase Composite Index errors.
-  // Sorting will be done client-side below.
-  qArgs.push(limit(limitCount));
-  if (lastDoc) qArgs.push(startAfter(lastDoc));
+  // Note: We remove limit() from the DB query because without orderBy('created_at')
+  // (which requires a composite index), Firebase returns an arbitrary unordered
+  // batch (usually the oldest). This makes new listings appear "deleted".
+  qArgs.push(limit(1000)); // fetch broadly to ensure newest are included
   
   const q = query(listingsRef, ...qArgs);
   const snapshot = await getDocs(q);
   
-  const fetchedData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  let fetchedData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   
   // Client-side Sort
   fetchedData.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
+  // Client-side pagination/limiting
+  let startIndex = 0;
+  if (lastDoc) {
+      const lastIndex = fetchedData.findIndex(l => l.id === lastDoc.id);
+      if (lastIndex !== -1) startIndex = lastIndex + 1;
+  }
+  
+  const pageData = fetchedData.slice(startIndex, startIndex + limitCount);
+
   return {
-    data: fetchedData,
-    lastDoc: snapshot.docs[snapshot.docs.length - 1]
+    data: pageData,
+    lastDoc: pageData.length > 0 ? { id: pageData[pageData.length - 1].id } : null
   };
 };
 
