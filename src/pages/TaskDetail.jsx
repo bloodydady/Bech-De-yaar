@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { getLazyTaskById, updateLazyTask, createNotification, deleteLazyTask } from '../firebase/firestore';
+import { getChatId } from '../firebase/realtimeDb';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { MapPin, Clock, School, Building2, CheckCircle2, ShieldAlert, Share2, Star, UserCircle, Trash2 } from 'lucide-react';
+import { MapPin, Clock, School, Building2, CheckCircle2, ShieldAlert, Share2, Star, UserCircle, Trash2, MessageSquare } from 'lucide-react';
 
 const TaskDetail = () => {
     const { id } = useParams();
@@ -272,13 +272,21 @@ const TaskDetail = () => {
                                 {isPoster ? (
                                     <>
                                         <p className="text-gray-600 mb-6 text-sm font-medium"><strong>{task.accepted_by_name}</strong> is currently completing this task. Mark it as completed once they arrive.</p>
-                                        <button 
-                                            onClick={handleMarkComplete}
-                                            disabled={actionLoading}
-                                            className="w-full py-4 bg-brand-success hover:bg-green-600 text-white font-black rounded-xl transition shadow-lg shadow-green-200 flex justify-center items-center"
-                                        >
-                                            {actionLoading ? "Completing..." : "Mark as Completed ✅"}
-                                        </button>
+                                        <div className="flex flex-col gap-3">
+                                            <Link 
+                                                to={`/chat/${getChatId(currentUser.uid, task.accepted_by)}`} 
+                                                className="w-full py-4 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-xl transition flex justify-center items-center"
+                                            >
+                                                <MessageSquare className="w-5 h-5 mr-2" /> Chat with Earner
+                                            </Link>
+                                            <button 
+                                                onClick={handleMarkComplete}
+                                                disabled={actionLoading}
+                                                className="w-full py-4 bg-brand-success hover:bg-green-600 text-white font-black rounded-xl transition shadow-lg shadow-green-200 flex justify-center items-center"
+                                            >
+                                                {actionLoading ? "Completing..." : "Mark as Completed ✅"}
+                                            </button>
+                                        </div>
                                     </>
                                 ) : isEarner ? (
                                     <>
@@ -287,6 +295,12 @@ const TaskDetail = () => {
                                             <p className="text-xs text-gray-500 uppercase font-bold text-left mb-1">Deliver to:</p>
                                             <p className="font-bold text-gray-900 text-left">{task.location}</p>
                                         </div>
+                                        <Link 
+                                            to={`/chat/${getChatId(currentUser.uid, task.posted_by)}`} 
+                                            className="w-full py-4 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-xl transition flex justify-center items-center"
+                                        >
+                                            <MessageSquare className="w-5 h-5 mr-2" /> Message Poster
+                                        </Link>
                                     </>
                                 ) : (
                                     <p className="text-gray-500 font-medium">This task has already been taken by someone else.</p>

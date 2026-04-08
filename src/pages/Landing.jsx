@@ -71,11 +71,14 @@ const Landing = () => {
              Buy, Sell, and Rent items with zero commission. For school students, college students, and exam aspirants—safe, fast, and trusted.
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-up [animation-delay:600ms]">
-            <Link to="/browse" className="group bg-brand-orange text-white text-lg font-black px-10 py-5 rounded-2xl shadow-[0_10px_40px_rgba(245,166,35,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center">
-              Browse Listings <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+          <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 animate-fade-up [animation-delay:600ms]">
+            <Link to="/browse" className="group bg-brand-orange text-white text-base md:text-lg font-black px-6 md:px-8 py-4 rounded-xl md:rounded-2xl shadow-[0_10px_30px_rgba(245,166,35,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center w-full md:w-auto">
+              Browse Listings <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link to="/signup" className="text-white bg-white/5 hover:bg-white/10 glass text-lg font-bold px-10 py-5 rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-300 backdrop-blur-lg">
+            <Link to="/lazy-tasks" className="text-brand-navy bg-white hover:bg-gray-50 text-base md:text-lg font-black px-6 md:px-8 py-4 rounded-xl md:rounded-2xl border-2 border-white transition-all duration-300 flex items-center justify-center w-full md:w-auto shadow-xl">
+              <Zap className="w-5 h-5 mr-2 text-brand-orange fill-brand-orange" /> Lazy Tasks
+            </Link>
+            <Link to="/signup" className="text-white bg-white/5 hover:bg-white/10 glass text-base md:text-lg font-bold px-6 md:px-8 py-4 rounded-xl md:rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-300 backdrop-blur-lg w-full md:w-auto text-center">
               Start Selling
             </Link>
           </div>
