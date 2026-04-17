@@ -1,6 +1,25 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
 
-# Sitemaps
-Sitemap: https://bech-de-yaar.vercel.app/sitemap.xml
+# Priority crawl paths
+Allow: /browse
+Allow: /notes
+Allow: /lazy-tasks
+Allow: /about
+Allow: /post
+Allow: /signup
+Allow: /login
+Allow: /support/faqs
+
+# Block private/authenticated-only pages
+Disallow: /chat
+Disallow: /my-listings
+Disallow: /my-notes
+Disallow: /my-tasks
+Disallow: /settings
+Disallow: /admin
+Disallow: /profile/
+Disallow: /listing/*/edit
+
+# Sitemap
+Sitemap: https://bechdeyaar.vercel.app/sitemap.xml
