@@ -50,24 +50,40 @@ const AISupportBubble = () => {
                     })
                 });
 
-                if (response.ok) return await response.json();
+                const json = await response.json();
+                if (response.ok && json.choices) {
+                    return json;
+                } else {
+                    console.warn(`Model ${model} failed:`, json.error?.message || 'Unknown error');
+                    if (json.error?.code === 401) {
+                         throw new Error("Invalid API Key");
+                    }
+                }
             } catch (err) {
-                console.warn(`Model ${model} failed, trying next...`);
+                if (err.message === "Invalid API Key") throw err;
+                console.warn(`Attempt failed, trying next...`);
             }
         }
-        throw new Error("All models failed");
+        throw new Error("OpenRouter servers are completely overloaded.");
     };
 
     try {
       const data = await fetchWithRetry([
         "google/gemma-3-27b-it:free",
+        "huggingfaceh4/zephyr-7b-beta:free",
+        "mistralai/mistral-7b-instruct:free",
         "meta-llama/llama-3.3-70b-instruct:free",
+        "deepseek/deepseek-chat:free",
         "qwen/qwen3-next-80b-a3b-instruct:free"
       ]);
       const aiResponse = data.choices[0].message.content;
       setChat(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
-      setChat(prev => [...prev, { role: 'assistant', content: "Oops! I'm temporarily offline. Please try again in 1 minute!" }]);
+      if (error.message === "Invalid API Key") {
+        setChat(prev => [...prev, { role: 'assistant', content: "It looks like my API token is invalid or missing in Vercel. Please update it!" }]);
+      } else {
+        setChat(prev => [...prev, { role: 'assistant', content: "Oops! We are getting too many messages right now and our free servers are overloaded. Please try again in an hour! 😅" }]);
+      }
     } finally {
       setLoading(false);
     }
