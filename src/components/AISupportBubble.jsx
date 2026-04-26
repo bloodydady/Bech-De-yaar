@@ -4,8 +4,9 @@ import { MessageSquare, X, Send, Bot, User, Loader2, Sparkles } from 'lucide-rea
 const AISupportBubble = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [msg, setMsg] = useState('');
+  const [botGender, setBotGender] = useState('female');
   const [chat, setChat] = useState([
-    { role: 'assistant', content: "Hello! 👋 I'm your BechDeYaar Assistant. How can I help you today? You can ask me about selling items, safety tips, or how to upload your notes!" }
+    { role: 'assistant', content: `Hello! 👋 I'm Chatty Yaar. How can I help you today? You can ask me about selling items, safety tips, or we can just chat about anything!` }
   ]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
@@ -41,7 +42,7 @@ const AISupportBubble = () => {
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "You are the official AI assistant for BechDeYaar, India's smartest student campus marketplace. Help students with buying, selling, and renting items and sharing study notes. Use a friendly, student-focused, and helpful Indian tone. Mention that BechDeYaar allows trading within campuses like IITs, NITs, and local colleges with zero commission."
+                                "content": `You are Chatty Yaar, the official AI assistant for BechDeYaar (India's smartest student campus marketplace). You are a friendly, cool, and helpful ${botGender === "male" ? "Indian college boy" : "Indian college girl"}. Your gender is ${botGender}. Help students with buying, selling, renting items, OR just have a fun general conversation with them about any topic they want! Speak affectionately like a friend (yaar). Mention zero-commission campus trading if relevant.`
                             },
                             ...chat.slice(-6).map(c => ({ role: c.role, content: c.content })),
                             { "role": "user", "content": userMsg }
@@ -99,17 +100,33 @@ const AISupportBubble = () => {
         <div className="absolute bottom-20 right-0 w-[350px] sm:w-[400px] h-[550px] bg-white border border-gray-100 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden animate-slide-up">
             
             {/* Header */}
-            <div className="bg-brand-navy text-white p-6 flex items-center justify-between">
+            <div className="bg-brand-navy text-white p-5 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 shadow-inner">
-                        <Bot className="w-7 h-7 text-brand-orange" />
+                        {botGender === 'male' ? <span className="text-2xl">👨🏽</span> : <span className="text-2xl">👩🏽</span>}
                     </div>
                     <div>
-                        <h3 className="font-black text-lg leading-tight">Campus Bot</h3>
+                        <h3 className="font-black text-lg leading-tight">Chatty Yaar</h3>
                         <p className="text-brand-orange/80 text-xs font-bold uppercase tracking-widest flex items-center">
                             <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5 animate-pulse"></span> Online Helper
                         </p>
                     </div>
+                </div>
+
+                {/* Gender Toggle */}
+                <div className="flex bg-white/10 rounded-lg p-1 space-x-1">
+                    <button 
+                        onClick={() => setBotGender('male')}
+                        className={`px-2 py-1 text-xs font-bold rounded-md transition ${botGender === 'male' ? 'bg-white text-brand-navy shadow-sm' : 'text-white/60 hover:bg-white/20'}`}
+                    >
+                        Boy
+                    </button>
+                    <button 
+                        onClick={() => setBotGender('female')}
+                        className={`px-2 py-1 text-xs font-bold rounded-md transition ${botGender === 'female' ? 'bg-white text-brand-navy shadow-sm' : 'text-white/60 hover:bg-white/20'}`}
+                    >
+                        Girl
+                    </button>
                 </div>
             </div>
 
