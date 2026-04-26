@@ -8,7 +8,7 @@ import { Send, Image as ImageIcon, ArrowLeft, UserCircle, MessageCircle } from '
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import emailjs from 'emailjs-com';
-import { supabase } from '../firebase/storage';
+import { uploadImage } from '../firebase/storage';
 import toast from 'react-hot-toast';
 
 const Chat = () => {
@@ -154,56 +154,9 @@ const Chat = () => {
         const file = e.target.files[0];
         if (!file || !currentUser || !chatId) return;
 
-        // 1. Compress Image
-        const compressImage = (file) => {
-           return new Promise((resolve) => {
-               const reader = new FileReader();
-               reader.readAsDataURL(file);
-               reader.onload = (event) => {
-                   const img = new Image();
-                   img.src = event.target.result;
-                   img.onload = () => {
-                       const canvas = document.createElement('canvas');
-                       const MAX_WIDTH = 800;
-                       const MAX_HEIGHT = 800;
-                       let width = img.width;
-                       let height = img.height;
-
-                       if (width > height) {
-                           if (width > MAX_WIDTH) {
-                               height *= MAX_WIDTH / width;
-                               width = MAX_WIDTH;
-                           }
-                       } else {
-                           if (height > MAX_HEIGHT) {
-                               width *= MAX_HEIGHT / height;
-                               height = MAX_HEIGHT;
-                           }
-                       }
-                       canvas.width = width;
-                       canvas.height = height;
-                       const ctx = canvas.getContext('2d');
-                       ctx.drawImage(img, 0, 0, width, height);
-                       canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.6);
-                   };
-               };
-           });
-        };
-
-        toast.loading("Sending photo...");
+        toast.loading("Sending photo...", { id: "photo-upload" });
         try {
-            const compressedBlob = await compressImage(file);
-            const fileName = `chat/${chatId}/${Date.now()}.jpg`;
-            
-            const { data, error } = await supabase.storage
-                .from('listing-images')
-                .upload(fileName, compressedBlob);
-
-            if (error) throw error;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('listing-images')
-                .getPublicUrl(fileName);
+            const publicUrl = await uploadImage(file, `chat/${chatId}`);
 
             const messageData = {
                 sender_id: currentUser.uid,
@@ -213,11 +166,11 @@ const Chat = () => {
 
             const listId = listingInfo?.id || listingIdQuery || null;
             await sendRealtimeMessage(chatId, messageData, listId);
-            toast.dismiss();
+            toast.dismiss("photo-upload");
             toast.success("Photo sent!");
         } catch (error) {
             console.error("Upload error:", error);
-            toast.dismiss();
+            toast.dismiss("photo-upload");
             toast.error("Failed to send photo");
         }
     };
