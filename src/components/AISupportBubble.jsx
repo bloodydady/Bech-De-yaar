@@ -70,10 +70,7 @@ const AISupportBubble = () => {
     try {
       const data = await fetchWithRetry([
         "google/gemma-3-27b-it:free",
-        "huggingfaceh4/zephyr-7b-beta:free",
-        "mistralai/mistral-7b-instruct:free",
         "meta-llama/llama-3.3-70b-instruct:free",
-        "deepseek/deepseek-chat:free",
         "qwen/qwen3-next-80b-a3b-instruct:free"
       ]);
       const aiResponse = data.choices[0].message.content;
