@@ -114,13 +114,13 @@ const AISupportBubble = () => {
             </div>
 
             {/* Chat Body */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50 flex flex-col scroll-smooth">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#f8fafc] flex flex-col scroll-smooth">
                 {chat.map((c, i) => (
                     <div key={i} className={`flex ${c.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                        <div className={`max-w-[85%] px-5 py-3 rounded-2xl shadow-sm border text-sm font-medium leading-relaxed ${
+                        <div className={`max-w-[85%] px-5 py-3 shadow-md text-[15px] font-medium leading-relaxed ${
                             c.role === 'user' 
-                            ? 'bg-brand-orange text-white border-brand-orange rounded-br-none' 
-                            : 'bg-white text-gray-700 border-gray-100 rounded-bl-none'
+                            ? 'bg-[#1C2F5E] text-white rounded-3xl rounded-br-sm' 
+                            : 'bg-white text-gray-800 border border-gray-100 rounded-3xl rounded-bl-sm shadow-sm'
                         }`}>
                             {c.content}
                         </div>
@@ -128,16 +128,16 @@ const AISupportBubble = () => {
                 ))}
                 {loading && (
                     <div className="flex justify-start animate-fade-in">
-                        <div className="bg-white border-gray-100 text-gray-400 px-5 py-3 rounded-2xl rounded-bl-none shadow-sm flex items-center space-x-2">
+                        <div className="bg-white border border-gray-100 text-gray-400 px-5 py-3 rounded-3xl rounded-bl-sm shadow-sm flex items-center space-x-2">
                             <Loader2 className="w-4 h-4 animate-spin text-brand-orange" />
-                            <span className="text-xs font-bold uppercase tracking-wider">AI is thinking...</span>
+                            <span className="text-xs font-bold uppercase tracking-wider">Yaar is typing...</span>
                         </div>
                     </div>
                 )}
             </div>
 
             {/* Input Area */}
-            <form onSubmit={handleSend} className="p-4 bg-white border-t border-gray-100 flex items-center space-x-2">
+            <form onSubmit={handleSend} className="p-4 bg-white border-t border-gray-100 flex items-center space-x-3">
                 <input 
                     type="text" 
                     value={msg}
