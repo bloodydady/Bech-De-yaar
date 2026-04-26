@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createListing } from '../firebase/firestore';
+import { createListing, getAllUsers } from '../firebase/firestore';
 import { uploadImage } from '../firebase/storage';
 import ImageUpload from '../components/ImageUpload';
 import toast from 'react-hot-toast';
+import emailjs from 'emailjs-com';
 
 const CATEGORIES = [
   "Electronics", "Books", "Furniture", "Cycles", 
@@ -86,8 +87,39 @@ const PostListing = () => {
       };
 
       const newId = await createListing(listingData);
+
+      // --- NEW FEATURE: Send BCC Email to all active users ---
+      try {
+          const allUsers = await getAllUsers();
+          // Filter out the person who posted the ad, and anyone without an email
+          const recipientEmails = allUsers
+              .filter(u => u.email && u.id !== currentUser.uid)
+              .map(u => u.email);
+
+          if (recipientEmails.length > 0) {
+              const bccString = recipientEmails.join(',');
+
+              // Call EmailJS using a single request to cover all users via BCC
+              await emailjs.send(
+                  import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                  import.meta.env.VITE_EMAILJS_NEW_LISTING_TEMPLATE_ID, 
+                  {
+                      bcc_emails: bccString,
+                      listing_title: formData.title,
+                      price: formData.price,
+                      listing_url: `${window.location.origin}/listing/${newId}`
+                  },
+                  import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+              );
+              console.log(`Sent broadcast email via BCC to ${recipientEmails.length} users.`);
+          }
+      } catch (emailErr) {
+          console.error("Failed to send broadcast email", emailErr);
+          // Do nothing to the user view, the ad still posted successfully
+      }
+
       toast.dismiss("uploading");
-      toast.success("Listing posted successfully!");
+      toast.success("Listing posted & Users Notified!");
       navigate(`/listing/${newId}`);
 
     } catch (error) {

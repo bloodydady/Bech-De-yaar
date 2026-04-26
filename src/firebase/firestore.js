@@ -17,7 +17,7 @@ export const updateUser = async (id, data) => {
 // Admin Functions
 export const getAllUsers = async () => {
     try {
-        const q = query(collection(db, 'users'), limit(100));
+        const q = query(collection(db, 'users'), limit(500)); // Increased limit for BCC broadcast
         const res = await getDocs(q);
         const users = res.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         return users.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
