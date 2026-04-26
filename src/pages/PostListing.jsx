@@ -104,6 +104,7 @@ const PostListing = () => {
                   import.meta.env.VITE_EMAILJS_SERVICE_ID,
                   import.meta.env.VITE_EMAILJS_NEW_LISTING_TEMPLATE_ID, 
                   {
+                      poster_email: currentUser.email, // Option 1 support
                       bcc_emails: bccString,
                       listing_title: formData.title,
                       price: formData.price,
