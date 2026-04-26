@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './components/ScrollToTop';
 import AISupportBubble from './components/AISupportBubble';
+import { Analytics } from '@vercel/analytics/react';
 
 // Lazy load pages for performance
 const Landing = React.lazy(() => import('./pages/Landing'));
@@ -118,6 +119,7 @@ const App = () => {
             </Suspense>
           </main>
           
+          <Analytics />
           <Footer />
         </div>
       </AuthProvider>
