@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { subscribeToChats, subscribeToMessages, sendMessage as sendRealtimeMessage, markMessagesRead, getChatId } from '../firebase/realtimeDb';
+import { subscribeToChats, subscribeToMessages, sendMessage as sendRealtimeMessage, markMessagesRead, getChatId, clearChat, unsendMessage } from '../firebase/realtimeDb';
 import { getListingById, getUserById } from '../firebase/firestore';
 import { formatDistanceToNow, format } from 'date-fns';
-import { Send, Image as ImageIcon, ArrowLeft, UserCircle, MessageCircle } from 'lucide-react';
+import { Send, Image as ImageIcon, ArrowLeft, UserCircle, MessageCircle, Trash2 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import emailjs from 'emailjs-com';
@@ -251,6 +251,21 @@ const Chat = () => {
                                 <h3 className="font-bold text-gray-900 leading-tight">{otherUser?.name || 'Loading...'}</h3>
                                 <p className="text-xs font-semibold text-gray-500">{otherUser?.college_name}</p>
                             </div>
+                            <div className="ml-auto">
+                                <button 
+                                   onClick={() => {
+                                       if(window.confirm("Are you sure you want to permanently delete this entire chat conversation? This cannot be undone.")) {
+                                           clearChat(chatId);
+                                           navigate('/chat');
+                                           toast.success("Chat deleted successfully");
+                                       }
+                                   }}
+                                   className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition"
+                                   title="Delete Entire Chat"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Listing Preview Strip */}
@@ -276,7 +291,7 @@ const Chat = () => {
                             {messages.map((msg, idx) => {
                                 const isMe = msg.sender_id === currentUser.uid;
                                 return (
-                                    <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                    <div key={idx} className={`flex group ${isMe ? 'justify-end' : 'justify-start'}`}>
                                         {/* Show other user's avatar on their messages */}
                                         {!isMe && (
                                             <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mr-2 mt-1">
@@ -289,6 +304,21 @@ const Chat = () => {
                                                 )}
                                             </div>
                                         )}
+
+                                        {isMe && (
+                                            <button 
+                                              onClick={() => {
+                                                  if(window.confirm("Unsend this message?")) {
+                                                      unsendMessage(chatId, msg.msg_id);
+                                                  }
+                                              }}
+                                              className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-gray-400 hover:text-red-500 flex items-center justify-center self-center"
+                                              title="Unsend Message"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+
                                     <div className={`max-w-[70%] rounded-2xl overflow-hidden ${
                                             isMe 
                                               ? 'bg-brand-orange text-white rounded-br-sm shadow-sm' 

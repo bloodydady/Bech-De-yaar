@@ -1,5 +1,5 @@
 import { realtimeDb } from './firebase';
-import { ref, push, set, onValue, update, serverTimestamp } from 'firebase/database';
+import { ref, push, set, onValue, update, remove, serverTimestamp } from 'firebase/database';
 import { createNotification } from './firestore';
 
 export const getChatId = (userId1, userId2) => {
@@ -42,11 +42,23 @@ export const subscribeToMessages = (chatId, callback) => {
   const messagesRef = ref(realtimeDb, `messages/${chatId}/messages`);
   return onValue(messagesRef, (snapshot) => {
     const data = snapshot.val();
-    const messages = data ? Object.values(data).map(msg => ({ ...msg })) : [];
+    const messages = data ? Object.entries(data).map(([key, msg]) => ({ msg_id: key, ...msg })) : [];
     // Sorting by time
     messages.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
     callback(messages);
   });
+};
+
+export const unsendMessage = async (chatId, messageId) => {
+  const messageRef = ref(realtimeDb, `messages/${chatId}/messages/${messageId}`);
+  await remove(messageRef);
+};
+
+export const clearChat = async (chatId) => {
+  const messagesRef = ref(realtimeDb, `messages/${chatId}`);
+  const chatRef = ref(realtimeDb, `chats/${chatId}`);
+  await remove(messagesRef);
+  await remove(chatRef);
 };
 
 export const subscribeToChats = (userId, callback) => {
