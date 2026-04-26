@@ -46,7 +46,12 @@ const Browse = () => {
       // Client side filtering for text, price, and college mapping
       let filtered = res.data;
       if (filters.query) {
-         filtered = filtered.filter(l => l.title.toLowerCase().includes(filters.query.toLowerCase()));
+         const queryTokens = filters.query.toLowerCase().split(/\s+/).filter(Boolean);
+         filtered = filtered.filter(l => {
+             const searchableString = `${l.title} ${l.description || ''} ${(l.tags || []).join(' ')}`.toLowerCase();
+             // Check if EVERY word typed by the user exists somewhere in the title/desc/tags
+             return queryTokens.every(token => searchableString.includes(token));
+         });
       }
       if (filters.college) {
          filtered = filtered.filter(l => l.college_name.toLowerCase().includes(filters.college.toLowerCase()));
