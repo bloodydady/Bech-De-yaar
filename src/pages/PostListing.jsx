@@ -88,12 +88,14 @@ const PostListing = () => {
 
       const newId = await createListing(listingData);
 
-      // --- NEW FEATURE: Send BCC Email to all active users ---
+      // --- NEW FEATURE: Send BCC Email to 30 most recent active users ---
       try {
           const allUsers = await getAllUsers();
           // Filter out the person who posted the ad, and anyone without an email
+          // Assuming user objects have a 'createdAt' or similar, or just taking the last 30 sorted by index
           const recipientEmails = allUsers
               .filter(u => u.email && u.id !== currentUser.uid)
+              .slice(-30)
               .map(u => u.email);
 
           if (recipientEmails.length > 0) {
