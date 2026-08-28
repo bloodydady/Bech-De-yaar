@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import GlobalAdsBanner from './components/GlobalAdsBanner';
@@ -123,6 +124,7 @@ const App = () => {
           <Footer />
         </div>
       </AuthProvider>
+      <Analytics />
     </BrowserRouter>
   );
 };
